@@ -1,22 +1,15 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import express  from 'express';
-import db from './database/connect.js';
-
+import express from 'express';
+import userroutes from "./routes/users.js"; // Updated with .js extension
 
 const app = express();
 const PORT = 5000;
 
-app.get('/', async (_, res) => {
- try {
-     const response = await db`select * from products`;
-     console.log(response)
-     res.json(response);
- } catch (error) {
-     console.error('Database query error:', error);
-    res.status(500).json({ error: 'Database query error' });
- }
-});
+app.use("/api", userroutes);
+app.use("/", (req, res) => {
+    res.send("hello jivan")
+})
 
 app.listen(PORT, () => {
   console.log(`Listening to http://localhost:${PORT}`);
