@@ -1,56 +1,100 @@
-import { useState } from "react";
+import { useForm, SubmitHandler } from 'react-hook-form';
+import LoginImage from "../assets/images/signup.jpg"
+import { FcGoogle } from "react-icons/fc";
+import { FaApple } from "react-icons/fa";
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { LoginFormField } from './LoginFormField';
 
-type Props = { 
+
+
+const formValidationSchema = yup.object({
+ 
+  
+  email: yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  
+  password: yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters")
+});
+
+
+
+type IFormInput = {
+  
     email: string;
     password: string;
-    role: string;
 }
 
+const LoginOption = [
+  {
+    icons:<FcGoogle />,
+    title:"Sign in with Google"
+  },
+  {
+    icons:<FaApple />,
+    title:"Sign in with Apple"
+  }
+]
 
 
 
+const Login = () => {
+  const { register, handleSubmit, formState:{errors} } = useForm<IFormInput>({
+    resolver:yupResolver(formValidationSchema),
+  });
 
-const Login = ({email,password,role}: Props) => {
-    const [formData, setFormData] = useState({ email: "", password: "", role: "" });
-
-
-
-    const handleSubmit = (event:Event) => {
-    event.preventDefault();
-        console.log("handling form data");
-        console.log(formData.email)
-        console.log(formData.password)
-        console.log(formData.role)
-}
-
-const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const newValue = event.currentTarget.value;
-    const name = event.currentTarget.name;
-    setFormData({...formData,[name]:newValue})
-  
-     
-      
-}
+  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
   return (
-      <form>
+    <section className='container grid grid-cols-2'> 
+      <section className="flex justify-center flex-col items-center h-full w-full ">
+        <div className='flex justify-center items-center w-full'>
+          <h1 className='font-semibold text-[30px] mb-14'>Welcome Back !</h1>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className='max-w-[600px] md:min-w-[500px]'>
+          {LoginFormField.map((formField, index) => {
+            return (
+              <div key={index}>
+                <label htmlFor={formField.labelName} className='capitalize font-medium text-sm'>{formField.labelName}</label> <br />
+                <input {...register(formField.name)} type={formField.type} placeholder={formField.placeholder} className='border-[1px] py-1 text-sm px-2  rounded-lg w-full focus:ring-green-600 focus:outline-none' />
+                {/* displaying error message here  */}
+                {errors[formField.name] && (
+                  <p className='text-red-600 text-xs font-semibold'>{errors[formField.name]?.message}</p>
           
-       <label htmlFor="email">Email</label>
-          <input type="email" name="email" id="email" placeholder="eg:harry@gmail.com" required onChange={handleChange}/>
-          <label htmlFor="password">Password</label>
-          <input type="password" name="password" id="password" placeholder="enter you password" onChange={handleChange} required />
+                )}
 
-          <label htmlFor="role">Role</label>
-          <select name="role" id="role" onChange={handleChange} required>
-              <option value="vendor">Vendor</option>
-              <option value="customer">Customer</option>
-          </select>
+                <div className='mt-2'></div>
+             </div>
+            )
+          })}
+          <input type='submit' value="login" className='w-full cursor-pointer bg-green-700 hover:bg-green-800  text-white font-bold text-sm py-2 rounded-md' />
+          <hr className='text-black'/>
+          <div className='grid grid-cols-2 gap-4 mt-10'>
+          {LoginOption.map((option, index) => (
+            <div key={index} className=''>
+              <div className='flex items-center hover:scale-105 transition-all duration-150 delay-75 border-2 px-3 py-2 cursor-pointer rounded-full justify-center'>
+                <div className="icons">{option.icons}</div>
+                <div className="text-xs ml-1 font-semibold  rounded">{option.title}</div>
+              </div>
+            </div>
+          ))}
+                     <div className='flex w-full justify-center min-w-[600px] items-center'>
+  <h1 className='text-sm font-semibold text-center  w-full'>
+    Don't have an account? <a href="#" className='text-blue-500'>Sign Up</a>
+  </h1>
+</div>
 
-          <input type="submit" value="submit" onClick={handleSubmit} />
-   
-
-
-
-      </form>
+                      </div>
+                      
+        </form> 
+      </section>
+      <section className="right">
+          <img src={LoginImage} alt=""  className='h-full object-cover min-h-screen' />
+      </section>
+      </section>
   )
 }
 
