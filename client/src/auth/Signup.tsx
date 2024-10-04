@@ -32,7 +32,7 @@ const Signup = () => {
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
   return (
-    <section className='grid grid-cols-2'>
+    <section className='container grid grid-cols-2'>
       <section className="flex justify-center flex-col items-center h-full ">
         <div className='flex justify-center items-center'>
           <h1 className='font-semibold text-[30px] mb-14'>Get Started Now</h1>
@@ -43,7 +43,7 @@ const Signup = () => {
             return (
               <div key={index}>
                 <label htmlFor={formField.labelName} className='capitalize font-medium text-sm'>{formField.labelName}</label> <br />
-                <input {...register} type={formField.type} placeholder={formField.placeholder} className='border-[1px] py-1 text-sm px-2  rounded-lg w-full focus:ring-green-600 focus:outline-none' />
+                <input {...register(formField.name)} type={formField.type} placeholder={formField.placeholder} className='border-[1px] py-1 text-sm px-2  rounded-lg w-full focus:ring-green-600 focus:outline-none' />
                 <br />  <br />
              </div>
             )
