@@ -3,15 +3,31 @@ import { SignupFormField } from './SignupFormField';
 import LoginImage from "../assets/images/login_image.jpg"
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+
+
+const formValidationSchema = yup.object({
+  fullname: yup.string()
+    .required("Full name is required")
+    .min(5, "Full name must be at least 5 characters"),
+  
+  email: yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  
+  password: yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters")
+});
 
 
 
 type IFormInput = {
-    user_id: number;
     fullname: string;
     email: string;
     password: string;
-    role: 'user'|'vendor';
 }
 
 const LoginOption = [
@@ -28,7 +44,9 @@ const LoginOption = [
 
 
 const Signup = () => {
-  const { register, handleSubmit } = useForm<IFormInput>();
+  const { register, handleSubmit, formState:{errors} } = useForm<IFormInput>({
+    resolver:yupResolver(formValidationSchema),
+  });
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
   return (
@@ -44,7 +62,13 @@ const Signup = () => {
               <div key={index}>
                 <label htmlFor={formField.labelName} className='capitalize font-medium text-sm'>{formField.labelName}</label> <br />
                 <input {...register(formField.name)} type={formField.type} placeholder={formField.placeholder} className='border-[1px] py-1 text-sm px-2  rounded-lg w-full focus:ring-green-600 focus:outline-none' />
-                <br />  <br />
+                {/* displaying error message here  */}
+                {errors[formField.name] && (
+                  <p className='text-red-600 text-xs font-semibold'>{errors[formField.name]?.message}</p>
+          
+                )}
+
+                <div className='mt-2'></div>
              </div>
             )
           })}
