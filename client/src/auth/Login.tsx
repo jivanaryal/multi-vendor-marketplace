@@ -5,6 +5,9 @@ import { FaApple } from "react-icons/fa";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginFormField } from './LoginFormField';
+import axios from 'axios';
+import { BASE_URI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -41,12 +44,33 @@ const LoginOption = [
 
 
 
+
+
+
 const Login = () => {
+  const navigate = useNavigate();
   const { register, handleSubmit, formState:{errors} } = useForm<IFormInput>({
     resolver:yupResolver(formValidationSchema),
   });
 
-  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    LoginPostRequest(data);
+  }
+
+
+  const LoginPostRequest = async (data:unknown) => {
+  axios.post(`${BASE_URI}users/login`,data).then((res) => {
+    if (res.status === 200) {
+      console.log(res);
+      localStorage.setItem("token", res.data.token);
+      navigate("/");
+    } else {
+      alert("internal server problem");
+        }
+  }).catch((err) => {
+    console.log(err);
+    })
+}
   return (
     <section className='container grid grid-cols-2'> 
       <section className="flex justify-center flex-col items-center h-full w-full ">
@@ -83,7 +107,7 @@ const Login = () => {
           ))}
                      <div className='flex w-full justify-center min-w-[600px] items-center'>
   <h1 className='text-sm font-semibold text-center  w-full'>
-    Don't have an account? <a href="#" className='text-blue-500'>Sign Up</a>
+    Don't have an account? <a href="/signup" className='text-blue-500'>Sign Up</a>
   </h1>
 </div>
 

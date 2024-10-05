@@ -7,6 +7,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import axios from 'axios';
 import { BASE_URI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -44,20 +45,11 @@ const LoginOption = [
 ]
 
 
-const postFormData =async (data:unknown) => {
-  axios.post(`${BASE_URI}/users/signup`,data).then((res) => {
-    if (res.status === 200) {
-      alert("the user created sucessfully");
-    } else {
-      alert("internal server problem");
-        }
-  }).catch((err) => {
-    console.log(err);
-    })
-}
+
 
 
 const Signup = () => {
+  const navigate = useNavigate();
   const { register, handleSubmit, formState:{errors} } = useForm<IFormInput>({
     resolver:yupResolver(formValidationSchema),
   });
@@ -65,6 +57,19 @@ const Signup = () => {
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
      postFormData(data)
   }
+
+   const postFormData =async (data:unknown) => {
+  axios.post(`${BASE_URI}users/signup`,data).then((res) => {
+    if (res.status === 200) {
+      alert("the user created sucessfully");
+      navigate("/login");
+    } else {
+      alert("internal server problem");
+        }
+  }).catch((err) => {
+    console.log(err);
+    })
+}
   return (
     <section className='container grid grid-cols-2'>
       <section className="flex justify-center flex-col items-center h-full ">
@@ -101,7 +106,7 @@ const Signup = () => {
           ))}
              <div className='flex w-full justify-center min-w-[600px] items-center'>
   <h1 className='text-sm font-semibold text-center  w-full'>
-    Already  have an account? <a href="#" className='text-blue-500'>Sign in</a>
+    Already  have an account? <a href="/login" className='text-blue-500'>Sign in</a>
   </h1>
 </div>
             </div>
