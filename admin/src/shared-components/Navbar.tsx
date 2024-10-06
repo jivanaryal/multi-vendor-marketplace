@@ -2,7 +2,7 @@
 
 const Navbar = () => {
   return (
-    <div>Navbar</div>
+    <div className="ml-8">Navbar</div>
   )
 }
 

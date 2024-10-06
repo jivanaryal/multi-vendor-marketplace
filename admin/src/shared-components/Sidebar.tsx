@@ -1,151 +1,149 @@
-import { useReducer } from "react"
-import { HiChevronDown } from "react-icons/hi"
-import { IoBagAdd } from "react-icons/io5"
-import { MdCategory, MdDashboardCustomize, MdOutlineFormatListNumberedRtl } from "react-icons/md"
-import { RiMenu3Fill } from "react-icons/ri"
-import { useLocation, useNavigate } from "react-router-dom"
-
-
+import React, { useReducer } from "react";
+import { GoDiamond } from "react-icons/go";
+import { HiChevronDown } from "react-icons/hi";
+import { MdCategory, MdDashboardCustomize } from "react-icons/md";
+import { RiMenu3Fill } from "react-icons/ri";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface SubItem {
-    title: string;
-    path: string | null;
-    icons: JSX.Element;
-
+  title: string;
+  path: string | null;
+  icons: JSX.Element;
 }
-
 
 interface SideBarItemType {
-    title: string;
-    icons: JSX.Element;
-    path: string | null;
-    subItems: SubItem[] | null;
+  title: string;
+  icons: JSX.Element;
+  path: string | null;
+  subItems: SubItem[] | null;
 }
 
-
-
-const SidebarItem:SideBarItemType[] = [
-    {
+const SidebarItem: SideBarItemType[] = [
+  {
     title: "dashboard",
     icons: <MdDashboardCustomize />,
     path: "/",
     subItems: null,
-    },
-    {
+  },
+  {
     title: "category",
     icons: <MdCategory />,
     path: null,
-        subItems: [
-            {
-             title: "add category",
+    subItems: [
+      {
+        title: "add category",
         path: "/category/add-category",
-        icons: <IoBagAdd />,
-            }, {
-                title: "view category",
-                path: "/category/view-category",
-                icons: <MdOutlineFormatListNumberedRtl />
-        }
+        icons: <GoDiamond />,
+      },
+      {
+        title: "view category",
+        path: "/category/view-category",
+        icons: <GoDiamond />,
+      },
     ],
-    },
-]
-
+  },
+];
 
 interface SidebarAction {
-    type: "toggle",
-    payload:keyof SidebarState,
+  type: "toggle";
+  payload: keyof SidebarState;
 }
-
 
 interface SidebarState {
   category: boolean;
 }
 
-
-
-function reducer(state:SidebarState, action:SidebarAction):SidebarState {
-    switch (action.type) {
-        case "toggle": {
-            return {
-                ...state, 
-                [action.payload]: !state[action.payload],
-            }
-        }
-        default:
-            throw new Error("unknow action: " + action.type)
-     }
-}
-
-
-
-
-
-
-
-const initialState:SidebarState = {
-    category:false,
-}
-
-
-const Sidebar = () => {
-    const [state, dispatch] = useReducer(reducer, initialState);
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const handleNavigation = (path: string | null)=>{
-        if (path) navigate(path);
+function reducer(state: SidebarState, action: SidebarAction): SidebarState {
+  switch (action.type) {
+    case "toggle": {
+      return {
+        ...state,
+        [action.payload]: !state[action.payload],
+      };
     }
+    default:
+      throw new Error("unknown action: " + action.type);
+  }
+}
 
-    const isActive = (path: string | null) => location.pathname === path;
+interface SidebarProps {
+  show: boolean;
+  setShow: (value: boolean) => void;
+}
 
-    const renderSubItems = (subItems: SubItem[]) => (
-        <section className="ml-8 mt-1 ">
+const initialState: SidebarState = {
+  category: false,
+};
 
+const Sidebar = ({ show, setShow }: SidebarProps) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-            {subItems.map((item, i) => (
-                <ul
-                    key={i}
-                    className={`flex items-center gap-2 my-4 cursor-pointer hover:text-blue-500 ${isActive(item.path) ? "text-blue-500" : "text-gray-800"
-                        }`}
-                    onClick={() => handleNavigation(item.path)}
-                >
-                    <li className="text-xl">{item.icons}</li>
-                    <li className="capitalize text-[15px] leading-[20px] font-medium">
-                        {item.title}
-                    </li>
-                </ul>
-            ))}
-        </section>
-    );
+  const handleNavigation = (path: string | null) => {
+    if (path) navigate(path);
+  };
+
+  const isActive = (path: string | null) => location.pathname === path;
+
+  const renderSubItems = (subItems: SubItem[]) => (
+    <AnimatePresence>
+      {state.category && (
+        <motion.section
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+          className="ml-8 overflow-hidden"
+        >
+          {subItems.map((item, i) => (
+            <ul
+              key={i}
+              className={`flex items-center gap-2 mb-3 mt-2 cursor-pointer hover:text-blue-500 ${
+                isActive(item.path) ? "text-blue-500" : "text-gray-800"
+              }`}
+              onClick={() => handleNavigation(item.path)}
+            >
+              <li className="text-sm">{item.icons}</li>
+              <li className="capitalize text-[15px] leading-[20px] font-medium">
+                {item.title}
+              </li>
+            </ul>
+          ))}
+        </motion.section>
+      )}
+    </AnimatePresence>
+  );
+
   return (
-      <div className="bg-[#FFFFFF]">
+    <div className="bg-[#FFFFFF]">
       <main>
-        {/* <img src={logo} alt="logo" className="h-14 inline-flex animate-pulse -mt-1"/> */}
         <div className="flex justify-between mx-3 items-center">
-        <strong className="font-extrabold text-gray-800   text-2xl mt-3  ml-1 mb-4 inline-flex">
-         Admin
+          <strong className="font-extrabold text-gray-800 text-2xl mt-3 ml-1 mb-4 inline-flex">
+            Admin
           </strong>
           <strong>
-            <RiMenu3Fill className="text-2xl cursor-pointer"/>
+            <RiMenu3Fill
+              className="text-2xl cursor-pointer"
+              onClick={() => setShow(!show)}
+            />
           </strong>
-          </div>
+        </div>
         <section>
-          <nav className="mt-6 flex justify-center  flex-col ml-4 gap-2 mr-3">
+          <nav className="mt-6 flex justify-center flex-col ml-4 gap-2 mr-3">
             {SidebarItem.map((item, index) => (
               <nav key={index}>
                 <ul
-                  className={`flex  items-center gap-2 cursor-pointer pl-4 rounded group hover:bg-[#5570F1] py-2 ${
+                  className={`flex items-center gap-2 cursor-pointer pl-4 rounded group hover:bg-[#5570F1] py-2 ${
                     isActive(item.path) && "bg-[#E9F1FF]"
                   }`}
-                        onClick={() => {
-                            
-                            handleNavigation(item.path)
-                            if (item.subItems) {
-                                
-                                dispatch({ type: "toggle", payload: "category" })
-                            }
-                        }
-                            
-                        }
+                  onClick={() => {
+                    handleNavigation(item.path);
+                    if (item.subItems) {
+                      dispatch({ type: "toggle", payload: "category" });
+                    }
+                  }}
                 >
                   <li className="flex items-center gap-2">
                     <span className="text-xl group-hover:text-white">
@@ -160,10 +158,7 @@ const Sidebar = () => {
                     </span>
                   </li>
                   {item.subItems && (
-                    <button
-                     
-                      className="ml-auto group-hover:text-white"
-                    >
+                    <button className="ml-auto group-hover:text-white">
                       <HiChevronDown
                         className={`transition-transform duration-400 text-2xl ${
                           state.category ? "-rotate-180" : ""
@@ -172,16 +167,14 @@ const Sidebar = () => {
                     </button>
                   )}
                 </ul>
-                {item.subItems &&
-                  state.category &&
-                  renderSubItems(item.subItems)}
+                {item.subItems && renderSubItems(item.subItems)}
               </nav>
             ))}
           </nav>
         </section>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
