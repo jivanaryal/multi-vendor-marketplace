@@ -2,6 +2,7 @@ import { useReducer } from "react"
 import { HiChevronDown } from "react-icons/hi"
 import { IoBagAdd } from "react-icons/io5"
 import { MdCategory, MdDashboardCustomize, MdOutlineFormatListNumberedRtl } from "react-icons/md"
+import { RiMenu3Fill } from "react-icons/ri"
 import { useLocation, useNavigate } from "react-router-dom"
 
 
@@ -119,9 +120,14 @@ const Sidebar = () => {
       <div className="bg-[#FFFFFF]">
       <main>
         {/* <img src={logo} alt="logo" className="h-14 inline-flex animate-pulse -mt-1"/> */}
+        <div className="flex justify-between mx-3 items-center">
         <strong className="font-extrabold text-gray-800   text-2xl mt-3  ml-1 mb-4 inline-flex">
          Admin
-        </strong>
+          </strong>
+          <strong>
+            <RiMenu3Fill className="text-2xl cursor-pointer"/>
+          </strong>
+          </div>
         <section>
           <nav className="mt-6 flex justify-center  flex-col ml-4 gap-2 mr-3">
             {SidebarItem.map((item, index) => (
