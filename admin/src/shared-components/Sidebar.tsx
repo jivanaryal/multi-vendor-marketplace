@@ -38,7 +38,7 @@ const SidebarItem: SideBarItemType[] = [
       },
       {
         title: "new category",
-        path: "/category/add-category",
+        path: "/category/new",
         icons: <GoDiamond />,
       },
     ],
