@@ -64,5 +64,22 @@ const LoginCustomer = async(req, res) => {
 
 };
 
+
+const getAllUsers = async (req, res) => {
+
+
+    try {
+         const result = await db`
+    SELECT * FROM users
+    `;
+   return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({error:'internal server error'})
+    }
+   
+
+    
+}
+
 // Use named exports
-export { SignupCustomer, LoginCustomer };
+export { SignupCustomer, LoginCustomer,getAllUsers };
