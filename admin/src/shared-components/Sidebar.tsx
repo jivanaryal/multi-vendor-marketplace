@@ -1,7 +1,7 @@
 import React, { useReducer } from "react";
-import { GoDiamond } from "react-icons/go";
+import { GoDiamond, GoStack } from "react-icons/go";
 import { HiChevronDown } from "react-icons/hi";
-import { MdCategory, MdDashboardCustomize } from "react-icons/md";
+import {  MdDashboardCustomize } from "react-icons/md";
 import { RiMenu3Fill } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -28,17 +28,17 @@ const SidebarItem: SideBarItemType[] = [
   },
   {
     title: "category",
-    icons: <MdCategory />,
+    icons: <GoStack />,
     path: null,
     subItems: [
       {
-        title: "add category",
-        path: "/category/add-category",
+        title: "category list",
+        path: "/category/view-category",
         icons: <GoDiamond />,
       },
       {
-        title: "view category",
-        path: "/category/view-category",
+        title: "new category",
+        path: "/category/add-category",
         icons: <GoDiamond />,
       },
     ],
@@ -106,7 +106,7 @@ const Sidebar = ({ show, setShow }: SidebarProps) => {
               onClick={() => handleNavigation(item.path)}
             >
               <li className="text-sm">{item.icons}</li>
-              <li className="capitalize text-[15px] leading-[20px] font-medium">
+              <li className="capitalize text-[14px] leading-[20px] font-medium">
                 {item.title}
               </li>
             </ul>
