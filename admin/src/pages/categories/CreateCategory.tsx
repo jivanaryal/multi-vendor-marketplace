@@ -84,8 +84,10 @@ const CreateCategory = () => {
 
       // Show success message
       message.success('Category created successfully!');
+
       form.resetFields();  // Reset the form after successful submission
       setValue(null);      // Reset selected parent category
+      location.reload()
 
     } catch (error) {
       console.error('Error submitting the form:', error);
