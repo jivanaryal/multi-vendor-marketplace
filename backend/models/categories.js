@@ -8,10 +8,25 @@ const getCategories = async () => {
     return result;
 }
 
+const getParent = async () => {
+    const result = await db`
+    SELECT * FROM categories where parent_id is null;
+    `;
+    console.log(result)
+    return result;
+}
+
+const getChild = async (id) => {
+    const result = await db`
+    SELECT * FROM categories where parent_id = ${id}
+    `;
+    return result;
+}
+
 
 const createCategory = async (name,parent_id) => {
     const result = await db`
-    INSERT INTO categories(name,parent_id)VALUES(${name},${parent_id})
+    INSERT INTO categories(name,parent_id,hasChildren)VALUES(${name},${parent_id},false)
       RETURNING *;
     `;
     console.log(result)
@@ -34,5 +49,7 @@ const deleteCat =async (id) => {
 export {
     getCategories,
     createCategory,
-    deleteCat
+    deleteCat,
+    getParent,
+    getChild
 }

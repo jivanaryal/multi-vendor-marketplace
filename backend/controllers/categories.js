@@ -1,4 +1,4 @@
-import { createCategory, deleteCat, getCategories } from "../models/categories.js"
+import { createCategory, deleteCat, getCategories, getChild, getParent } from "../models/categories.js"
 
 
 const getAllCategories = async (req, res) => {
@@ -9,6 +9,27 @@ const getAllCategories = async (req, res) => {
     } catch (error) {
         console.log(error);
        return res.status(500).json({error:"internal server error"})
+    }
+}
+const getParentCategories = async (req, res) => {
+    try {
+        const result = await getParent();
+        console.log(result);
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+       return res.status(500).json({error:"internal server error"})
+    }
+}
+
+const getDirectChild = async (req, res) => {
+    const { parentID } = req.params;
+    try {
+        const result = await getChild(parentID);
+        console.log(result);
+        res.send(result);
+    } catch (error) {
+        
     }
 }
 
@@ -52,6 +73,8 @@ const deleteCategory =async (req, res) => {
 export {
     getAllCategories,
     postCategories,
-    deleteCategory
+    deleteCategory,
+    getParentCategories,
+    getDirectChild
 
 }
