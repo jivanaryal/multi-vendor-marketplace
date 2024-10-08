@@ -1,3 +1,4 @@
+import db from "../database/connect.js";
 import { createCategory, deleteCat, getCategories, getChild, getParent } from "../models/categories.js"
 
 
@@ -37,18 +38,35 @@ const getDirectChild = async (req, res) => {
 const postCategories = async (req, res) => {
 
     try {
-          const { name, parent_id } = req.body;
+        const { name, parent_id } = req.body;
+        
     if (!name) {
-        res.status(404).json({ message: "name  are required " });
-    }
-    console.log("hello")
+        res.status(400).json({ message: "Name  is required " });
+        }
 
+
+        if (parent_id) {
+            const isCategoryAvailable = await db`
+           SELECT * FROM categories WHERE id = ${parent_id} 
+        `;
+            
+            if (isCategoryAvailable.length === 0) {
+                return res.status(404).json({ message: 'provided category is not available' });
+            }
+            if (isCategoryAvailable[0].haschildren === 'false') {
+                await db`
+                   update categories set haschildren = true where id = ${parent_id}    
+                `;
+                }
+        }
     const result = await createCategory(name, parent_id);
-     res.status(200).json({message:"category added sucessfully",result});
+        res.status(200).json({ message: "category added sucessfully", result });
+      
     } catch (error) {
         console.log(error);
-        res.status(500).json({message:error})
+        return res.status(500).json({message:error})
     }
+
 }
 
 
