@@ -36,38 +36,39 @@ const getDirectChild = async (req, res) => {
 
 
 const postCategories = async (req, res) => {
+    console.log(req.body)
+    console.log(req.files)
+  try {
+      const { name, parent_id } = req.body;
+      console.log(req.files)
+    const images = req.files || [];  // Ensure it's an empty array if no files are uploaded
 
-    try {
-        const { name, parent_id } = req.body;
-        
     if (!name) {
-        res.status(400).json({ message: "Name  is required " });
-        }
-
-
-        if (parent_id) {
-            const isCategoryAvailable = await db`
-           SELECT * FROM categories WHERE id = ${parent_id} 
-        `;
-            
-            if (isCategoryAvailable.length === 0) {
-                return res.status(404).json({ message: 'provided category is not available' });
-            }
-            if (isCategoryAvailable[0].haschildren === 'false') {
-                await db`
-                   update categories set haschildren = true where id = ${parent_id}    
-                `;
-                }
-        }
-    const result = await createCategory(name, parent_id);
-        res.status(200).json({ message: "category added sucessfully", result });
-      
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({message:error})
+      return res.status(400).json({ message: "Name is required" });
     }
 
-}
+    if (parent_id) {
+      const isCategoryAvailable = await db`SELECT * FROM categories WHERE id = ${parent_id}`;
+      if (isCategoryAvailable.length === 0) {
+        return res.status(404).json({ message: 'Provided category is not available' });
+      }
+      if (isCategoryAvailable[0].haschildren === 'false') {
+        await db`UPDATE categories SET haschildren = true WHERE id = ${parent_id}`;
+      }
+    }
+
+    // If images were uploaded, map their paths
+    const imageUrls = images.length > 0 ? images.map(file => file.path) : [];
+
+    const result = await createCategory(name, parent_id, imageUrls);
+    return res.status(200).json({ message: "Category added successfully", result });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 
 
 const deleteCategory =async (req, res) => {
@@ -81,11 +82,6 @@ const deleteCategory =async (req, res) => {
    
     
 }
-
-
-
-
-
 
 
 export {

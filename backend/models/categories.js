@@ -24,9 +24,9 @@ const getChild = async (id) => {
 }
 
 
-const createCategory = async (name,parent_id) => {
+const createCategory = async (name,parent_id,imageUrls) => {
     const result = await db`
-    INSERT INTO categories(name,parent_id,hasChildren)VALUES(${name},${parent_id},false)
+    INSERT INTO categories(name,parent_id,hasChildren,image_urls)VALUES(${name},${parent_id},false,${imageUrls})
       RETURNING *;
     `;
     console.log(result)

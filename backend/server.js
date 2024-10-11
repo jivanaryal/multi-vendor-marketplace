@@ -6,7 +6,9 @@ import userroutes from "./routes/users.js"; // Updated with .js extension
 import categoryRoutes from './routes/categories.js';
 
 const app = express();
-app.use(express.json())
+app.use(express.json());  // For parsing application/json
+app.use(express.urlencoded({ extended: true }));  // For parsing application/x-www-form-urlencoded
+
 app.use(cors())
 const PORT = 5000;
 
