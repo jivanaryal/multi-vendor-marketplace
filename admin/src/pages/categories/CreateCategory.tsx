@@ -1,6 +1,7 @@
-import { Button, Form, Input, TreeSelect, message, Spin } from "antd";
+import { Button, Form, Input, TreeSelect, message, Spin, Upload } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { UploadOutlined } from '@ant-design/icons';
 
 type CategoryTypes = {
   id: number;
@@ -21,11 +22,10 @@ const CreateCategory = () => {
   const [categories, setCategories] = useState<TreeNode[]>([]);
   const [value, setValue] = useState<number | undefined>();
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false); // Loading state for the form submission
+  const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState<any[]>([]);
 
-  const onChange = (newValue: number) => {
-    setValue(newValue);
-  };
+  const onChange = (newValue: number) => setValue(newValue);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -35,13 +35,12 @@ const CreateCategory = () => {
     fetchCategory();
   }, []);
 
-  // Transform categories into tree data with proper isLeaf property
   const transformToTreeData = (categoryList: CategoryTypes[]): TreeNode[] => {
     return categoryList.map((category: CategoryTypes) => ({
       title: category.name,
       value: category.id,
       key: category.id,
-      isLeaf: category.haschildren === 'false', // If no children, mark as leaf
+      isLeaf: category.haschildren === 'false',
     }));
   };
 
@@ -55,17 +54,14 @@ const CreateCategory = () => {
     }
   };
 
-  // Recursively update categories with their children
   const updateCategoryChildren = (categories: TreeNode[], key: number, subCategories: TreeNode[]): TreeNode[] => {
     return categories.map((category) => {
       if (category.key === key) {
-        // If the category matches the key, update it with children
         return {
           ...category,
           children: subCategories,
         };
       } else if (category.children) {
-        // If the category has children, recursively update them
         return {
           ...category,
           children: updateCategoryChildren(category.children, key, subCategories),
@@ -77,46 +73,50 @@ const CreateCategory = () => {
 
   const onLoadData = async (treeNode: any) => {
     const { key, children } = treeNode;
-
-    if (children) {
-      return; // If children already loaded, do nothing
-    }
-
+    if (children) return;
     const subCategories = await loadSubCategories(key);
-
-    setCategories((prevCategories) =>
-      updateCategoryChildren(prevCategories, key, subCategories)
-    );
+    setCategories((prevCategories) => updateCategoryChildren(prevCategories, key, subCategories));
   };
 
-  // Handle form submission
   const onFinish = async (values: { name: string }) => {
-    setLoading(true); // Set loading to true when the form starts submitting
+    setLoading(true);
     try {
-      // Send POST request to the backend
-      const response = await axios.post('http://localhost:5000/api/mv/categories', {
-        name: values.name, // Category name
-        parent_id: value || null, // Parent category ID
+      const formData = new FormData();
+      formData.append('name', values.name);
+      formData.append('parent_id', value || null);
+
+
+     console.log('Before adding images:');
+for (let [key, value] of formData.entries()) {
+  console.log(key, value);  // Log the key and value pairs
+}
+      fileList.forEach(file => formData.append('images', file));
+
+      console.log('After adding images:');
+for (let [key, value] of formData.entries()) {
+  console.log(key, value);  // Log key-value pairs after adding files
+}
+
+    
+
+      const response = await axios.post('http://localhost:5000/api/mv/categories', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      console.log(response)
-
-      // Show success message
       if (response.status === 200) {
-         message.success("category created sucessfully")
-       }
-
-      form.resetFields(); // Reset the form after successful submission
-      setValue(undefined); // Reset selected parent category
-      setTimeout(() => {
-    location.reload();
-}, 1000); // Delay of 1 second
-
+        message.success("Category created successfully");
+        form.resetFields();
+        setValue(undefined);
+        setFileList([]);
+        setCategories((prevCategories) => [...prevCategories, response.data.result]);
+      }
     } catch (error) {
       console.error('Error submitting the form:', error);
-      message.error('Failed to create category. Please try again.');
+      message.error(error.response?.data?.message || 'Failed to create category. Please try again.');
     } finally {
-      setLoading(false); // Set loading to false after submission is complete
+      setLoading(false);
     }
   };
 
@@ -135,10 +135,7 @@ const CreateCategory = () => {
         >
           <Input />
         </Form.Item>
-        <Form.Item
-          label="Select Parent Category"
-          name="parent_id"
-        >
+        <Form.Item label="Select Parent Category" name="parent_id">
           <TreeSelect
             treeDefaultExpandAll={false}
             allowClear
@@ -151,6 +148,20 @@ const CreateCategory = () => {
             loadData={onLoadData}
             treeData={categories}
           />
+        </Form.Item>
+        <Form.Item label="Upload Images">
+          <Upload
+            fileList={fileList}
+            beforeUpload={(file) => {
+              setFileList((prev) => [...prev, file]);
+              return false;
+            }}
+            onRemove={(file) => {
+              setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+            }}
+          >
+            <Button icon={<UploadOutlined />}>Upload</Button>
+          </Upload>
         </Form.Item>
         <Button type="primary" htmlType="submit" loading={loading}>
           Submit
