@@ -2,7 +2,15 @@
 
 const ProductCart = () => {
   return (
-    <div>ProductCart</div>
+    <div>
+      <nav>
+        <div>add</div>
+        <div>sub</div>
+        <div>multiply</div>
+        <div>additon</div>
+        <div>subtraction</div>
+      </nav>
+    </div>
   )
 }
 
