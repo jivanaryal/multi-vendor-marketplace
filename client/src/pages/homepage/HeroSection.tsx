@@ -2,7 +2,7 @@
 
 const HeroSection = () => {
   return (
-    <div>HeroSection</div>
+    <div>Hero section upadted form</div>
   )
 }
 
