@@ -4,6 +4,7 @@ import Dashboard from "./pages/dashboard/Dashboard"
 import UserReducer from "./dummy/UserReducer"
 import NotFound from "./NotFound"
 import CreateCategory from "./pages/categories/CreateCategory"
+import CategoryList from "./pages/categories/CategoryList"
 
 const router = createBrowserRouter(createRoutesFromElements(
   <Route>
@@ -11,6 +12,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route index element={<Dashboard />} />
       <Route path="/reducer" element={<UserReducer />} />
       <Route path="/category/new" element={<CreateCategory />} />
+      <Route path="/category/list" element={<CategoryList />} />
       
 
 

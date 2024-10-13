@@ -33,7 +33,7 @@ const SidebarItem: SideBarItemType[] = [
     subItems: [
       {
         title: "category list",
-        path: "/category/view-category",
+        path: "/category/list",
         icons: <GoDiamond />,
       },
       {

@@ -1,4 +1,4 @@
-import { Button, Form, Input, TreeSelect, message, Spin, Upload } from "antd";
+import { Button, Form, Input, TreeSelect, message, Spin, Upload, Modal } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { UploadOutlined } from '@ant-design/icons';
@@ -24,6 +24,9 @@ const CreateCategory = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | undefined>();
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewTitle, setPreviewTitle] = useState<string>("");
 
   const onChange = (newValue: number) => setValue(newValue);
 
@@ -78,63 +81,69 @@ const CreateCategory = () => {
     setCategories((prevCategories) => updateCategoryChildren(prevCategories, key, subCategories));
   };
 
+  // Handle preview logic
+  const handlePreview = async (file: any) => {
+    setPreviewImage(file.thumbUrl || file.preview);
+    setPreviewVisible(true);
+    setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
+  };
+
   const onFinish = async (values: { name: string }) => {
-    setLoading(true);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('parent_id', value || '');
+
+    if (fileList.length > 0) {
+      fileList.forEach((file) => formData.append('images', file.originFileObj));
+    }
+
     try {
-      const formData = new FormData();
-      formData.append('name', values.name);
-      formData.append('parent_id', value || null);
-
-
-     console.log('Before adding images:');
-for (let [key, value] of formData.entries()) {
-  console.log(key, value);  // Log the key and value pairs
-}
-      fileList.forEach(file => formData.append('images', file));
-
-      console.log('After adding images:');
-for (let [key, value] of formData.entries()) {
-  console.log(key, value);  // Log key-value pairs after adding files
-}
-
-    
-
+      setLoading(true);
       const response = await axios.post('http://localhost:5000/api/mv/categories', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      if (response.status === 200) {
-        message.success("Category created successfully");
-        form.resetFields();
-        setValue(undefined);
-        setFileList([]);
-        setCategories((prevCategories) => [...prevCategories, response.data.result]);
-      }
+      message.success("Category added successfully!");
+      form.resetFields();
+      setFileList([]);
     } catch (error) {
-      console.error('Error submitting the form:', error);
-      message.error(error.response?.data?.message || 'Failed to create category. Please try again.');
+      message.error("Error occurred while adding the category");
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const beforeUpload = (file: any) => {
+    // Generate preview using FileReader
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setFileList((prevList) => [...prevList, { ...file, thumbUrl: e.target?.result }]);
+    };
+    reader.readAsDataURL(file);
+    return false; // Prevent automatic upload
+  };
+
   return (
-    <main>
+    <main style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
       {loading && (
         <div className="loading-overlay">
           <Spin size="large" />
         </div>
       )}
-      <Form form={form} onFinish={onFinish}>
+      <Form
+        form={form}
+        onFinish={onFinish}
+        layout="vertical"
+        style={{ background: "#fff", padding: "24px", borderRadius: "8px", boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)" }}
+      >
         <Form.Item
           name="name"
           label="Category Name"
           rules={[{ required: true, message: 'Please enter the category name' }]}
         >
-          <Input />
+          <Input placeholder="Enter category name" />
         </Form.Item>
+
         <Form.Item label="Select Parent Category" name="parent_id">
           <TreeSelect
             treeDefaultExpandAll={false}
@@ -143,29 +152,39 @@ for (let [key, value] of formData.entries()) {
             style={{ width: "100%" }}
             value={value}
             dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-            placeholder="Please select"
+            placeholder="Select a parent category (optional)"
             onChange={onChange}
             loadData={onLoadData}
             treeData={categories}
           />
         </Form.Item>
-        <Form.Item label="Upload Images">
+
+        <Form.Item label="Upload Image">
           <Upload
+            listType="picture-card"
             fileList={fileList}
-            beforeUpload={(file) => {
-              setFileList((prev) => [...prev, file]);
-              return false;
-            }}
-            onRemove={(file) => {
-              setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
-            }}
+            beforeUpload={beforeUpload}
+            onRemove={(file) => setFileList(fileList.filter((f) => f.uid !== file.uid))}
+            onPreview={handlePreview} // Handle image preview
           >
-            <Button icon={<UploadOutlined />}>Upload</Button>
+            {fileList.length < 1 && <UploadOutlined />}
           </Upload>
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Submit
-        </Button>
+
+        <Modal
+          visible={previewVisible}
+          title={previewTitle}
+          footer={null}
+          onCancel={() => setPreviewVisible(false)}
+        >
+          <img alt="preview" style={{ width: '100%' }} src={previewImage} />
+        </Modal>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={loading} style={{ width: "100%" }}>
+            Submit
+          </Button>
+        </Form.Item>
       </Form>
     </main>
   );
