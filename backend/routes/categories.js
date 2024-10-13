@@ -6,32 +6,36 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 const router = express.Router();
 
-cloudinary.config({ 
-    cloud_name: 'dhuqhwez5', 
-    api_key: '922586393391723', 
-    api_secret: 'ggq1mErIKRv8VBwNzeEIzFDGj-U' 
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: 'dhuqhwez5',
+  api_key: '922586393391723',
+  api_secret: 'ggq1mErIKRv8VBwNzeEIzFDGj-U',
 });
 
+// Cloudinary storage configuration for multer
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: async (req, file) => {
-        // Use req.body.name instead of req.body.categoryName
-        const folderName = `categories/${req.body.name || 'default_folder'}`;
-        return {
-            folder: folderName,
-            allowed_formats: ['jpg', 'png', 'jpeg', 'gif'],
-        };
-    },
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    const folderName = `categories/${req.body.name || 'default_folder'}`;
+    return {
+      folder: folderName,
+      format: 'jpeg', // You can specify the format or let Cloudinary determine it
+      public_id: file.originalname.split('.')[0], // Use original filename without extension
+    };
+  },
 });
 
-
-const upload = multer({ storage: storage });
+// Multer configuration with CloudinaryStorage
+const upload = multer({ storage });
 
 // Define routes
 router.route("/").get(getAllCategories);
 router.route("/parent").get(getParentCategories);
 router.route("/:parentID").get(getDirectChild);
-router.route("/", upload.array('images')).post(postCategories); // Use multer middleware
+
+router.post("/", upload.array('images', 10),postCategories);
+
 router.route("/:id").delete(deleteCategory);
 
 export default router;
